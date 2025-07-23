@@ -249,6 +249,7 @@
         let isPlaying = false;
         let autoPlayInterval;
         let wrongAttempts = 0;
+        let isChecking = false; // Flag to prevent multiple submissions
         const TOTAL_SENTENCES = sentences.length;
 
         function emojiExplosion() {
@@ -303,24 +304,24 @@
         }
 
         function checkAnswer() {
+            if (isChecking) return; // Prevent checking if already processing
+
             const userInput = document.getElementById('userInput').value.trim();
             const result = document.getElementById('result');
             const currentSentence = sentences[currentSentenceIndex].english;
             
-            // Strict comparison: check if the user's input (case-insensitive)
-            // exactly matches the correct sentence, including the period.
             if (userInput.toLowerCase() === currentSentence.toLowerCase()) {
+                isChecking = true; // Lock checking
                 stopAutoPlay();
                 result.textContent = "Correct!";
                 result.className = 'correct';
                 emojiExplosion();
                 
-                // A point is awarded for getting it right on the 1st or 2nd try.
                 if (wrongAttempts <= 1) {
                     completedCount++;
                 }
                 
-                wrongAttempts = 0; // Reset for the next question
+                wrongAttempts = 0; 
                 
                 setTimeout(() => {
                     currentSentenceIndex++;
@@ -331,14 +332,16 @@
                          playSentence();
                          startAutoPlay();
                     }
+                    isChecking = false; // Unlock after moving to the next question
                 }, 2000);
             } else {
                 wrongAttempts++;
                 result.textContent = `Incorrect, try again! (${3 - wrongAttempts} attempts left)`;
                 result.className = 'incorrect';
                 if (wrongAttempts >= 3) {
+                    isChecking = true; // Lock checking
                     stopAutoPlay();
-                    wrongAttempts = 0; // Reset for the next question
+                    wrongAttempts = 0; 
                     result.textContent = "Moving to the next word...";
                     setTimeout(() => {
                         currentSentenceIndex++;
@@ -349,6 +352,7 @@
                             playSentence();
                             startAutoPlay();
                         }
+                        isChecking = false; // Unlock after moving to the next question
                     }, 2000);
                 }
             }
@@ -377,6 +381,7 @@
 
         function startGame() {
             wrongAttempts = 0;
+            isChecking = false;
             document.getElementById('game-container').innerHTML = `
                 <h1>Emoji Spelling Adventure</h1>
                 <p>Listen and type what you hear!<span class="instruction-vi">Hãy lắng nghe và gõ lại câu bạn nghe được.</span></p>
@@ -406,6 +411,7 @@
             wrongAttempts = 0;
             speechSynthesis.cancel();
             isPlaying = false;
+            isChecking = false;
             
             document.getElementById('game-container').innerHTML = `
                 <h1>Emoji Spelling Adventure</h1>
