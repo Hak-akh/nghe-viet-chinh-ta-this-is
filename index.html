@@ -365,6 +365,14 @@
             const hintData = sentences[currentSentenceIndex];
             document.getElementById('hint').innerHTML = `Hint: ${hintData.english}<br>(${hintData.vietnamese} ${hintData.emoji})`;
         }
+        
+        // Function to clear the hint text
+        function clearHint() {
+            const hintEl = document.getElementById('hint');
+            if (hintEl) {
+                hintEl.innerHTML = '';
+            }
+        }
 
         function startGame() {
             wrongAttempts = 0;
@@ -382,7 +390,11 @@
                 <p id="hint"></p>
                 <p id="result"></p>
             `;
+            // Add event listeners for new features
             document.getElementById('userInput').addEventListener('keypress', handleKeyPress);
+            document.getElementById('userInput').addEventListener('focus', clearHint); // Hide hint on focus
+            document.getElementById('hint').addEventListener('copy', (event) => event.preventDefault()); // Prevent copying hint
+
             playSentence();
             startAutoPlay();
         }
