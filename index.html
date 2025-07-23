@@ -313,13 +313,19 @@
                 result.textContent = "Correct!";
                 result.className = 'correct';
                 emojiExplosion();
-                wrongAttempts = 0;
+                
+                // --- CHANGE: Only increment score on the first attempt ---
+                if (wrongAttempts === 0) {
+                    completedCount++;
+                }
+                
+                wrongAttempts = 0; // Reset for the next question
                 
                 setTimeout(() => {
                     currentSentenceIndex++;
-                    completedCount++;
                     if (currentSentenceIndex >= TOTAL_SENTENCES) {
-                        document.getElementById('game-container').innerHTML = `<h1>Congratulations! 🥳</h1><p>You've learned all ${completedCount} words!</p><button onclick="resetGame()">Play Again</button>`;
+                        // --- CHANGE: Updated final message ---
+                        document.getElementById('game-container').innerHTML = `<h1>Congratulations! 🥳</h1><p>You scored ${completedCount} out of ${TOTAL_SENTENCES} on the first try!</p><button onclick="resetGame()">Play Again</button>`;
                     } else {
                          updateGameScreen();
                          playSentence();
@@ -337,7 +343,8 @@
                     setTimeout(() => {
                         currentSentenceIndex++;
                         if (currentSentenceIndex >= TOTAL_SENTENCES) {
-                            document.getElementById('game-container').innerHTML = `<h1>Game Over!</h1><p>You completed ${completedCount} out of ${TOTAL_SENTENCES} words.</p><button onclick="resetGame()">Play Again</button>`;
+                             // --- CHANGE: Updated final message ---
+                            document.getElementById('game-container').innerHTML = `<h1>Game Over!</h1><p>You scored ${completedCount} out of ${TOTAL_SENTENCES} on the first try.</p><button onclick="resetGame()">Play Again</button>`;
                         } else {
                             updateGameScreen();
                             playSentence();
@@ -353,7 +360,8 @@
                 document.getElementById('userInput').value = '';
                 document.getElementById('hint').textContent = '';
                 document.getElementById('result').textContent = '';
-                document.getElementById('completion').textContent = `Completed: ${completedCount}/${TOTAL_SENTENCES}`;
+                // --- CHANGE: Update score display text ---
+                document.getElementById('completion').textContent = `Score: ${completedCount}/${TOTAL_SENTENCES}`;
              }
         }
 
@@ -374,7 +382,8 @@
                     <button onclick="showHint()">Hint</button>
                     <button onclick="resetGame()">Reset Game</button>
                 </div>
-                <p id="completion">Completed: ${completedCount}/${TOTAL_SENTENCES}</p>
+                // --- CHANGE: Update score display text ---
+                <p id="completion">Score: ${completedCount}/${TOTAL_SENTENCES}</p>
                 <p id="hint"></p>
                 <p id="result"></p>
             `;
