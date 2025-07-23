@@ -306,24 +306,26 @@
             const userInput = document.getElementById('userInput').value.trim();
             const result = document.getElementById('result');
             const currentSentence = sentences[currentSentenceIndex].english;
-            const normalize = (str) => str.toLowerCase().replace(/[.,!?']/g, '');
-
-            if (normalize(userInput) === normalize(currentSentence)) {
+            
+            // Strict comparison: check if the user's input (case-insensitive)
+            // exactly matches the correct sentence, including the period.
+            if (userInput.toLowerCase() === currentSentence.toLowerCase()) {
                 stopAutoPlay();
                 result.textContent = "Correct!";
                 result.className = 'correct';
                 emojiExplosion();
                 
-                if (wrongAttempts === 0) {
+                // A point is awarded for getting it right on the 1st or 2nd try.
+                if (wrongAttempts <= 1) {
                     completedCount++;
                 }
                 
-                wrongAttempts = 0;
+                wrongAttempts = 0; // Reset for the next question
                 
                 setTimeout(() => {
                     currentSentenceIndex++;
                     if (currentSentenceIndex >= TOTAL_SENTENCES) {
-                        document.getElementById('game-container').innerHTML = `<h1>Congratulations! 🥳</h1><p>You scored ${completedCount} out of ${TOTAL_SENTENCES} on the first try!</p><button onclick="resetGame()">Play Again</button>`;
+                        document.getElementById('game-container').innerHTML = `<h1>Congratulations! 🥳</h1><p>You scored ${completedCount} out of ${TOTAL_SENTENCES}!</p><button onclick="resetGame()">Play Again</button>`;
                     } else {
                          updateGameScreen();
                          playSentence();
@@ -336,12 +338,12 @@
                 result.className = 'incorrect';
                 if (wrongAttempts >= 3) {
                     stopAutoPlay();
-                    wrongAttempts = 0;
+                    wrongAttempts = 0; // Reset for the next question
                     result.textContent = "Moving to the next word...";
                     setTimeout(() => {
                         currentSentenceIndex++;
                         if (currentSentenceIndex >= TOTAL_SENTENCES) {
-                            document.getElementById('game-container').innerHTML = `<h1>Game Over!</h1><p>You scored ${completedCount} out of ${TOTAL_SENTENCES} on the first try.</p><button onclick="resetGame()">Play Again</button>`;
+                            document.getElementById('game-container').innerHTML = `<h1>Game Over!</h1><p>You scored ${completedCount} out of ${TOTAL_SENTENCES}.</p><button onclick="resetGame()">Play Again</button>`;
                         } else {
                             updateGameScreen();
                             playSentence();
@@ -366,7 +368,6 @@
             document.getElementById('hint').innerHTML = `Hint: ${hintData.english}<br>(${hintData.vietnamese} ${hintData.emoji})`;
         }
         
-        // Function to clear the hint text
         function clearHint() {
             const hintEl = document.getElementById('hint');
             if (hintEl) {
@@ -390,10 +391,9 @@
                 <p id="hint"></p>
                 <p id="result"></p>
             `;
-            // Add event listeners for new features
             document.getElementById('userInput').addEventListener('keypress', handleKeyPress);
-            document.getElementById('userInput').addEventListener('focus', clearHint); // Hide hint on focus
-            document.getElementById('hint').addEventListener('copy', (event) => event.preventDefault()); // Prevent copying hint
+            document.getElementById('userInput').addEventListener('focus', clearHint);
+            document.getElementById('hint').addEventListener('copy', (event) => event.preventDefault());
 
             playSentence();
             startAutoPlay();
