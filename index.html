@@ -304,14 +304,17 @@
         }
 
         function checkAnswer() {
-            if (isChecking) return; // Prevent checking if already processing
+            if (isChecking) return; 
 
             const userInput = document.getElementById('userInput').value.trim();
             const result = document.getElementById('result');
             const currentSentence = sentences[currentSentenceIndex].english;
             
-            if (userInput.toLowerCase() === currentSentence.toLowerCase()) {
-                isChecking = true; // Lock checking
+            // Strict, case-sensitive comparison.
+            const isCorrect = userInput === currentSentence;
+
+            if (isCorrect) {
+                isChecking = true; 
                 stopAutoPlay();
                 result.textContent = "Correct!";
                 result.className = 'correct';
@@ -332,14 +335,14 @@
                          playSentence();
                          startAutoPlay();
                     }
-                    isChecking = false; // Unlock after moving to the next question
+                    isChecking = false; 
                 }, 2000);
             } else {
                 wrongAttempts++;
                 result.textContent = `Incorrect, try again! (${3 - wrongAttempts} attempts left)`;
                 result.className = 'incorrect';
                 if (wrongAttempts >= 3) {
-                    isChecking = true; // Lock checking
+                    isChecking = true; 
                     stopAutoPlay();
                     wrongAttempts = 0; 
                     result.textContent = "Moving to the next word...";
@@ -352,7 +355,7 @@
                             playSentence();
                             startAutoPlay();
                         }
-                        isChecking = false; // Unlock after moving to the next question
+                        isChecking = false; 
                     }, 2000);
                 }
             }
