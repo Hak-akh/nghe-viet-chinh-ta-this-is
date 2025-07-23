@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emoji Spelling Adventure</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #ff6b81;
+            --primary-hover: #ff4757;
+            --secondary-color: #70a1ff;
+            --background-gradient: linear-gradient(120deg, #f8d5a3 0%, #f5a6b7 100%);
+            --container-bg: rgba(255, 255, 255, 0.95);
+            --text-color: #574b90;
+            --light-text: #7f8c8d;
+            --success-color: #2ed573;
+            --error-color: #ff4757;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Comic Neue', cursive;
+            background: var(--background-gradient);
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+            overflow-x: hidden;
+            color: var(--text-color);
+        }
+
+        #game-container {
+            text-align: center;
+            background: var(--container-bg);
+            padding: 25px 30px;
+            border-radius: 24px;
+            box-shadow: 0 12px 45px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 650px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid white;
+        }
+        
+        h1 {
+            font-family: 'Fredoka One', cursive;
+            font-size: clamp(24px, 6vw, 36px);
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            text-shadow: 2px 2px 0px rgba(255,255,255,0.7);
+        }
+
+        p {
+            font-size: clamp(16px, 4vw, 18px);
+            line-height: 1.6;
+            margin-top: 0;
+            font-weight: 700;
+        }
+        
+        .instruction-vi {
+            font-size: clamp(14px, 3.5vw, 16px);
+            color: var(--light-text);
+            margin-top: 4px;
+            display: block;
+        }
+
+        input[type="text"] {
+            padding: 14px 20px;
+            font-size: clamp(16px, 4vw, 18px);
+            width: 100%;
+            max-width: 450px;
+            margin: 15px 0;
+            box-sizing: border-box;
+            font-family: 'Comic Neue', cursive;
+            font-weight: 700;
+            border: 3px solid #dfe6e9;
+            border-radius: 30px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            text-align: center;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 10px rgba(112, 161, 255, 0.3);
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: clamp(15px, 4vw, 17px);
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            touch-action: manipulation;
+            font-family: 'Fredoka One', cursive;
+            transition: background-color 0.3s, transform 0.2s;
+            border-bottom: 4px solid #c0392b;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(2px);
+            border-bottom-width: 2px;
+        }
+
+        #hint {
+            color: var(--light-text);
+            margin-top: 15px;
+            font-size: clamp(14px, 4vw, 18px);
+            user-select: none;
+            line-height: 1.5;
+            min-height: 25px;
+            font-weight: 700;
+        }
+
+        #completion, #result {
+            font-size: clamp(16px, 4vw, 19px);
+            font-weight: 700;
+            margin-top: 15px;
+            min-height: 28px;
+        }
+        
+        #result.correct { color: var(--success-color); }
+        #result.incorrect { color: var(--error-color); }
+
+        .emoji-particle {
+            position: absolute;
+            pointer-events: none;
+            z-index: 10;
+            font-size: 28px;
+            opacity: 0;
+            animation: emoji-fly 1.2s ease-out forwards;
+        }
+
+        @keyframes emoji-fly {
+            0% {
+                transform: translate(0, 0) scale(0.5);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(1.5) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Emoji Spelling Adventure</h1>
+        <p>Click Start to begin the game!<span class="instruction-vi">Nhấn Bắt đầu để chơi!</span></p>
+        <button onclick="startGame()">Start</button>
+    </div>
+
+    <script>
+        const sentences = [
+            { english: "This is an alligator.", vietnamese: "Đây là con cá sấu", emoji: "🐊" },
+            { english: "This is an ant.", vietnamese: "Đây là con kiến", emoji: "🐜" },
+            { english: "This is an apple.", vietnamese: "Đây là quả táo", emoji: "🍎" },
+            { english: "This is a ball.", vietnamese: "Đây là quả bóng", emoji: "⚽" },
+            { english: "This is a banana.", vietnamese: "Đây là quả chuối", emoji: "🍌" },
+            { english: "This is a bear.", vietnamese: "Đây là con gấu", emoji: "🐻" },
+            { english: "This is a car.", vietnamese: "Đây là chiếc ô tô", emoji: "🚗" },
+            { english: "This is a cat.", vietnamese: "Đây là con mèo", emoji: "🐱" },
+            { english: "This is a cow.", vietnamese: "Đây là con bò", emoji: "🐄" },
+            { english: "This is a dog.", vietnamese: "Đây là con chó", emoji: "🐶" },
+            { english: "This is a drum.", vietnamese: "Đây là cái trống", emoji: "🥁" },
+            { english: "This is a duck.", vietnamese: "Đây là con vịt", emoji: "🦢" },
+            { english: "This is an ear.", vietnamese: "Đây là cái tai", emoji: "👂" },
+            { english: "This is an egg.", vietnamese: "Đây là quả trứng", emoji: "🥚" },
+            { english: "This is an elephant.", vietnamese: "Đây là con voi", emoji: "🐘" },
+            { english: "This is a fan.", vietnamese: "Đây là cái quạt", emoji: "🪭" },
+            { english: "This is a fish.", vietnamese: "Đây là con cá", emoji: "🐠" },
+            { english: "This is a frog.", vietnamese: "Đây là con ếch", emoji: "🐸" },
+            { english: "This is a gift.", vietnamese: "Đây là món quà", emoji: "🎁" },
+            { english: "This is a goat.", vietnamese: "Đây là con dê", emoji: "🐐" },
+            { english: "This is a bunch of grapes.", vietnamese: "Đây là chùm nho", emoji: "🍇" },
+            { english: "This is a hat.", vietnamese: "Đây là cái mũ", emoji: "🧢" },
+            { english: "This is a horse.", vietnamese: "Đây là con ngựa", emoji: "🐎" },
+            { english: "This is a house.", vietnamese: "Đây là ngôi nhà", emoji: "🏠" },
+            { english: "This is an ice cream.", vietnamese: "Đây là cây kem", emoji: "🍨" },
+            { english: "This is an insect.", vietnamese: "Đây là con côn trùng", emoji: "🐞" },
+            { english: "This is a jelly.", vietnamese: "Đây là món thạch", emoji: "🍮" },
+            { english: "This is a juice.", vietnamese: "Đây là ly nước ép", emoji: "🧃" },
+            { english: "This is a kangaroo.", vietnamese: "Đây là con chuột túi", emoji: "🦘" },
+            { english: "This is a key.", vietnamese: "Đây là chìa khóa", emoji: "🔑" },
+            { english: "This is a kite.", vietnamese: "Đây là con diều", emoji: "🪁" },
+            { english: "This is a lamp.", vietnamese: "Đây là cái đèn", emoji: "🪔" },
+            { english: "This is a leaf.", vietnamese: "Đây là chiếc lá", emoji: "🍃" },
+            { english: "This is a lion.", vietnamese: "Đây là con sư tử", emoji: "🦁" },
+            { english: "This is some milk.", vietnamese: "Đây là ít sữa", emoji: "🥛" },
+            { english: "This is the moon.", vietnamese: "Đây là mặt trăng", emoji: "🌙" },
+            { english: "This is a monkey.", vietnamese: "Đây là con khỉ", emoji: "🐒" },
+            { english: "This is a net.", vietnamese: "Đây là cái lưới", emoji: "🕸️" },
+            { english: "This is a nose.", vietnamese: "Đây là cái mũi", emoji: "👃" },
+            { english: "This is an octopus.", vietnamese: "Đây là con bạch tuộc", emoji: "🐙" },
+            { english: "This is an orange.", vietnamese: "Đây là quả cam", emoji: "🍊" },
+            { english: "This is an owl.", vietnamese: "Đây là con cú", emoji: "🦉" },
+            { english: "This is a pen.", vietnamese: "Đây là cây bút", emoji: "🖋️" },
+            { english: "This is a pig.", vietnamese: "Đây là con lợn", emoji: "🐷" },
+            { english: "This is a pizza.", vietnamese: "Đây là cái pizza", emoji: "🍕" },
+            { english: "This is a queen.", vietnamese: "Đây là nữ hoàng", emoji: "👑" },
+            { english: "This is a rabbit.", vietnamese: "Đây là con thỏ", emoji: "🐰" },
+            { english: "This is the rain.", vietnamese: "Đây là cơn mưa", emoji: "☔" },
+            { english: "This is a robot.", vietnamese: "Đây là con robot", emoji: "🤖" },
+            { english: "This is a sock.", vietnamese: "Đây là cái tất", emoji: "🧦" },
+            { english: "This is a star.", vietnamese: "Đây là ngôi sao", emoji: "⭐" },
+            { english: "This is the sun.", vietnamese: "Đây là mặt trời", emoji: "☀️" },
+            { english: "This is a table.", vietnamese: "Đây là cái bàn", emoji: "🪑" },
+            { english: "This is a tiger.", vietnamese: "Đây là con hổ", emoji: "🐅" },
+            { english: "This is a turtle.", vietnamese: "Đây là con rùa", emoji: "🐢" },
+            { english: "This is an umbrella.", vietnamese: "Đây là cái ô", emoji: "☂️" },
+            { english: "This is a unicorn.", vietnamese: "Đây là con kỳ lân", emoji: "🦄" },
+            { english: "This is a uniform.", vietnamese: "Đây là bộ đồng phục", emoji: "👕" },
+            { english: "This is a van.", vietnamese: "Đây là chiếc xe tải", emoji: "🚐" },
+            { english: "This is a vest.", vietnamese: "Đây là áo vest", emoji: "🦺" },
+            { english: "This is a violin.", vietnamese: "Đây là đàn violin", emoji: "🎻" },
+            { english: "This is a watch.", vietnamese: "Đây là đồng hồ", emoji: "⌚" },
+            { english: "This is a whale.", vietnamese: "Đây là con cá voi", emoji: "🐳" },
+            { english: "This is a window.", vietnamese: "Đây là cửa sổ", emoji: "🪟" },
+            { english: "This is a xylophone.", vietnamese: "Đây là đàn xylophone", emoji: "🎹" },
+            { english: "This is something yellow.", vietnamese: "Đây là thứ màu vàng", emoji: "💛" },
+            { english: "This is a yo-yo.", vietnamese: "Đây là con yo-yo", emoji: "🪀" },
+            { english: "This is a zebra.", vietnamese: "Đây là con ngựa vằn", emoji: "🦓" },
+            { english: "This is a zip.", vietnamese: "Đây là khóa kéo", emoji: "🤐" },
+            { english: "This is a zoo.", vietnamese: "Đây là sở thú", emoji: "🦒" }
+        ];
+
+        let currentSentenceIndex = 0;
+        let completedCount = 0;
+        let isPlaying = false;
+        let autoPlayInterval;
+        let wrongAttempts = 0;
+        const TOTAL_SENTENCES = sentences.length;
+
+        function emojiExplosion() {
+            const gameContainer = document.getElementById('game-container');
+            const input = document.getElementById('userInput');
+            if(!gameContainer || !input) return;
+
+            const currentEmoji = sentences[currentSentenceIndex].emoji;
+            const inputRect = input.getBoundingClientRect();
+            const containerRect = gameContainer.getBoundingClientRect();
+            const startX = inputRect.left - containerRect.left + inputRect.width / 2;
+            const startY = inputRect.top - containerRect.top + inputRect.height / 2;
+
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'emoji-particle';
+                particle.textContent = currentEmoji;
+                
+                const angle = Math.random() * 2 * Math.PI;
+                const distance = Math.random() * 150 + 80;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+
+                particle.style.left = `${startX}px`;
+                particle.style.top = `${startY}px`;
+                particle.style.setProperty('--tx', `${tx}px`);
+                particle.style.setProperty('--ty', `${ty}px`);
+                
+                gameContainer.appendChild(particle);
+                setTimeout(() => particle.remove(), 1200);
+            }
+        }
+
+        function playSentence() {
+            if (!isPlaying && sentences[currentSentenceIndex]) {
+                isPlaying = true;
+                const utterance = new SpeechSynthesisUtterance(sentences[currentSentenceIndex].english);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9;
+                utterance.onend = () => { isPlaying = false; };
+                speechSynthesis.speak(utterance);
+            }
+        }
+        
+        function startAutoPlay() {
+            if (autoPlayInterval) clearInterval(autoPlayInterval);
+            autoPlayInterval = setInterval(() => { if (!isPlaying) playSentence(); }, 5000);
+        }
+
+        function stopAutoPlay() {
+            if (autoPlayInterval) clearInterval(autoPlayInterval);
+        }
+
+        function checkAnswer() {
+            const userInput = document.getElementById('userInput').value.trim();
+            const result = document.getElementById('result');
+            const currentSentence = sentences[currentSentenceIndex].english;
+            const normalize = (str) => str.toLowerCase().replace(/[.,!?']/g, '');
+
+            if (normalize(userInput) === normalize(currentSentence)) {
+                stopAutoPlay();
+                result.textContent = "Correct!";
+                result.className = 'correct';
+                emojiExplosion();
+                wrongAttempts = 0;
+                
+                setTimeout(() => {
+                    currentSentenceIndex++;
+                    completedCount++;
+                    if (currentSentenceIndex >= TOTAL_SENTENCES) {
+                        document.getElementById('game-container').innerHTML = `<h1>Congratulations! 🥳</h1><p>You've learned all ${completedCount} words!</p><button onclick="resetGame()">Play Again</button>`;
+                    } else {
+                         updateGameScreen();
+                         playSentence();
+                         startAutoPlay();
+                    }
+                }, 2000);
+            } else {
+                wrongAttempts++;
+                result.textContent = `Incorrect, try again! (${3 - wrongAttempts} attempts left)`;
+                result.className = 'incorrect';
+                if (wrongAttempts >= 3) {
+                    stopAutoPlay();
+                    wrongAttempts = 0;
+                    result.textContent = "Moving to the next word...";
+                    setTimeout(() => {
+                        currentSentenceIndex++;
+                        if (currentSentenceIndex >= TOTAL_SENTENCES) {
+                            document.getElementById('game-container').innerHTML = `<h1>Game Over!</h1><p>You completed ${completedCount} out of ${TOTAL_SENTENCES} words.</p><button onclick="resetGame()">Play Again</button>`;
+                        } else {
+                            updateGameScreen();
+                            playSentence();
+                            startAutoPlay();
+                        }
+                    }, 2000);
+                }
+            }
+        }
+        
+        function updateGameScreen() {
+             if (document.getElementById('userInput')) {
+                document.getElementById('userInput').value = '';
+                document.getElementById('hint').textContent = '';
+                document.getElementById('result').textContent = '';
+                document.getElementById('completion').textContent = `Completed: ${completedCount}/${TOTAL_SENTENCES}`;
+             }
+        }
+
+        function showHint() {
+            const hintData = sentences[currentSentenceIndex];
+            document.getElementById('hint').innerHTML = `Hint: ${hintData.english}<br>(${hintData.vietnamese} ${hintData.emoji})`;
+        }
+
+        function startGame() {
+            wrongAttempts = 0;
+            document.getElementById('game-container').innerHTML = `
+                <h1>Emoji Spelling Adventure</h1>
+                <p>Listen and type what you hear!<span class="instruction-vi">Hãy lắng nghe và gõ lại câu bạn nghe được.</span></p>
+                <input type="text" id="userInput" placeholder="Type the sentence here...">
+                <div class="button-group">
+                    <button onclick="playSentence()">&#9658; Play Sound</button>
+                    <button onclick="checkAnswer()">Check</button>
+                    <button onclick="showHint()">Hint</button>
+                    <button onclick="resetGame()">Reset Game</button>
+                </div>
+                <p id="completion">Completed: ${completedCount}/${TOTAL_SENTENCES}</p>
+                <p id="hint"></p>
+                <p id="result"></p>
+            `;
+            document.getElementById('userInput').addEventListener('keypress', handleKeyPress);
+            playSentence();
+            startAutoPlay();
+        }
+
+        function resetGame() {
+            stopAutoPlay();
+            currentSentenceIndex = 0;
+            completedCount = 0;
+            wrongAttempts = 0;
+            speechSynthesis.cancel();
+            isPlaying = false;
+            
+            document.getElementById('game-container').innerHTML = `
+                <h1>Emoji Spelling Adventure</h1>
+                <p>Click Start to begin the game!<span class="instruction-vi">Nhấn Bắt đầu để chơi!</span></p>
+                <button onclick="startGame()">Start</button>
+            `;
+        }
+        
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                checkAnswer();
+            }
+        }
+    </script>
+</body>
+</html>
