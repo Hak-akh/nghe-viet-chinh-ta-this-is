@@ -314,17 +314,15 @@
                 result.className = 'correct';
                 emojiExplosion();
                 
-                // --- CHANGE: Only increment score on the first attempt ---
                 if (wrongAttempts === 0) {
                     completedCount++;
                 }
                 
-                wrongAttempts = 0; // Reset for the next question
+                wrongAttempts = 0;
                 
                 setTimeout(() => {
                     currentSentenceIndex++;
                     if (currentSentenceIndex >= TOTAL_SENTENCES) {
-                        // --- CHANGE: Updated final message ---
                         document.getElementById('game-container').innerHTML = `<h1>Congratulations! 🥳</h1><p>You scored ${completedCount} out of ${TOTAL_SENTENCES} on the first try!</p><button onclick="resetGame()">Play Again</button>`;
                     } else {
                          updateGameScreen();
@@ -343,7 +341,6 @@
                     setTimeout(() => {
                         currentSentenceIndex++;
                         if (currentSentenceIndex >= TOTAL_SENTENCES) {
-                             // --- CHANGE: Updated final message ---
                             document.getElementById('game-container').innerHTML = `<h1>Game Over!</h1><p>You scored ${completedCount} out of ${TOTAL_SENTENCES} on the first try.</p><button onclick="resetGame()">Play Again</button>`;
                         } else {
                             updateGameScreen();
@@ -360,7 +357,6 @@
                 document.getElementById('userInput').value = '';
                 document.getElementById('hint').textContent = '';
                 document.getElementById('result').textContent = '';
-                // --- CHANGE: Update score display text ---
                 document.getElementById('completion').textContent = `Score: ${completedCount}/${TOTAL_SENTENCES}`;
              }
         }
@@ -382,7 +378,6 @@
                     <button onclick="showHint()">Hint</button>
                     <button onclick="resetGame()">Reset Game</button>
                 </div>
-                // --- CHANGE: Update score display text ---
                 <p id="completion">Score: ${completedCount}/${TOTAL_SENTENCES}</p>
                 <p id="hint"></p>
                 <p id="result"></p>
